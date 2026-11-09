@@ -41,6 +41,21 @@ documind.duckdns.org {
 
 `flush_interval -1` hace que las respuestas en streaming lleguen token a token. Después: `cd ~/movifi && docker compose up -d --build web` y comprobar `curl https://movifi.duckdns.org/api/health`.
 
+## 2b. Si el disco es chico y no se puede ampliar
+
+Construir Angular en la VM necesita más de 1 GB temporal. Alternativa: compilar en tu PC y que la VM solo empaquete los archivos ya compilados.
+
+```bash
+cd frontend && npm run build        # genera dist/frontend/browser
+zip -r dist-frontend.zip dist/frontend/browser
+```
+
+Subir `dist-frontend.zip` a la VM (engranaje del SSH del navegador, Subir archivo) y descomprimirlo dentro de `~/documind/frontend/`. Después se levanta con el override:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.vm.yml up -d --build
+```
+
 ## 3. DocuMind
 
 ```bash
