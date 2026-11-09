@@ -1,0 +1,91 @@
+<section class="bg-card border-border flex h-full flex-col overflow-hidden rounded-2xl border">
+  @if (store.messages().length) {
+    <div class="border-border flex items-center justify-between border-b px-5 py-2 sm:px-8">
+      <span class="text-muted-foreground text-xs">Tu conversación se guarda</span>
+      <button
+        hlmBtn
+        variant="ghost"
+        size="sm"
+        [class]="confirmClear() ? 'text-destructive' : 'text-muted-foreground'"
+        [disabled]="store.asking()"
+        (click)="clear()"
+      >
+        {{ confirmClear() ? '¿Borrar todo?' : 'Nueva conversación' }}
+      </button>
+    </div>
+  }
+  <div #scroller class="min-h-0 flex-1 overflow-y-auto px-5 py-6 sm:px-8">
+    @if (!store.messages().length) {
+      <div class="mx-auto flex h-full max-w-xl flex-col justify-center py-6">
+        @if (!store.loaded()) {
+          <p class="text-muted-foreground text-sm">Cargando…</p>
+        } @else if (!store.documents().length) {
+          <h2 class="font-serif text-3xl leading-tight font-medium tracking-tight text-balance">Sube un PDF para empezar</h2>
+          <p class="text-muted-foreground mt-3 max-w-[48ch] leading-relaxed text-pretty">
+            Cuando termine de indexarse podrás preguntarle lo que quieras y cada respuesta citará el documento y la página.
+          </p>
+          <button hlmBtn variant="outline" class="mt-6 w-fit lg:hidden" (click)="goLibrary.emit()">Ir a la biblioteca</button>
+        } @else if (!store.readyDocs().length) {
+          <h2 class="font-serif text-3xl leading-tight font-medium tracking-tight text-balance">Indexando tus documentos</h2>
+          <p class="text-muted-foreground mt-3 max-w-[48ch] leading-relaxed text-pretty">
+            En unos segundos podrás preguntar. Si falla, el motivo aparece en la biblioteca.
+          </p>
+        } @else {
+          <h2 class="font-serif text-3xl leading-tight font-medium tracking-tight text-balance">¿Qué quieres saber de tus documentos?</h2>
+          <ul class="mt-6 flex flex-col items-start gap-2">
+            @for (s of suggestions; track s) {
+              <li>
+                <button
+                  type="button"
+                  class="bg-secondary text-secondary-foreground hover:bg-accent rounded-full px-4 py-2 text-left text-sm transition-colors"
+                  (click)="send(s)"
+                >
+                  {{ s }}
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    } @else {
+      <div class="mx-auto flex max-w-3xl flex-col gap-7" aria-live="polite">
+        @for (m of store.messages(); track m.id) {
+          <app-chat-message [message]="m" />
+        }
+      </div>
+    }
+  </div>
+
+  <form class="px-4 pt-1 pb-4 sm:px-8" (submit)="$event.preventDefault(); send()">
+    <div class="mx-auto max-w-3xl">
+      @if (store.readyDocs().length) {
+        <p class="text-muted-foreground mb-2 px-1 text-xs">
+          Consultando {{ store.scopeCount() }} {{ store.scopeCount() === 1 ? 'documento' : 'documentos' }}
+        </p>
+      }
+      <div class="bg-background border-input focus-within:border-ring focus-within:ring-ring/30 flex items-end gap-2 rounded-2xl border p-2 transition-shadow focus-within:ring-4">
+        <textarea
+          #box
+          rows="1"
+          class="placeholder:text-muted-foreground max-h-42 min-h-10 flex-1 resize-none bg-transparent px-2.5 py-2 text-base leading-snug outline-none disabled:cursor-not-allowed"
+          placeholder="Escribe tu pregunta"
+          aria-label="Pregunta"
+          maxlength="2000"
+          [disabled]="!store.readyDocs().length"
+          [value]="draft()"
+          (input)="onInput($event)"
+          (keydown)="onKey($event)"
+        ></textarea>
+        @if (store.asking()) {
+          <button hlmBtn type="button" size="icon" variant="secondary" aria-label="Detener respuesta" (click)="store.cancel()">
+            <ng-icon name="lucideSquare" />
+          </button>
+        } @else {
+          <button hlmBtn type="submit" size="icon" aria-label="Enviar pregunta" [disabled]="!draft().trim() || !store.readyDocs().length">
+            <ng-icon name="lucideArrowUp" />
+          </button>
+        }
+      </div>
+    </div>
+  </form>
+</section>

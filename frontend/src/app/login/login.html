@@ -1,0 +1,59 @@
+<div class="page-width flex min-h-dvh flex-col">
+  <header class="flex items-center gap-2.5 py-6">
+    <span class="bg-primary text-primary-foreground grid size-8 place-items-center rounded-lg">
+      <ng-icon name="lucideBookOpenText" class="text-base" />
+    </span>
+    <span class="font-serif text-xl font-semibold tracking-tight">DocuMind</span>
+  </header>
+
+  <main class="grid flex-1 items-center gap-12 pb-16 lg:grid-cols-[1.05fr_1fr] lg:gap-20">
+    <section class="intro max-w-xl">
+      <h1 class="font-serif text-5xl leading-[1.04] font-medium tracking-tight text-balance sm:text-6xl">
+        Pregúntale a tus PDF. La respuesta trae su fuente.
+      </h1>
+      <p class="text-muted-foreground mt-6 max-w-[52ch] text-lg leading-relaxed text-pretty">
+        Sube tus documentos y consúltalos en lenguaje natural. Cada afirmación indica el archivo y la
+        página de donde salió, para que puedas comprobarla.
+      </p>
+
+      <div class="mt-9 flex flex-col items-start gap-3">
+        <button hlmBtn size="lg" class="h-11 gap-2.5 px-5 text-[0.95rem]" [disabled]="auth.signingIn()" (click)="signIn()">
+          @if (auth.signingIn()) {
+            <ng-icon name="lucideLoaderCircle" class="animate-spin" />
+            Abriendo Google
+          } @else {
+            <svg viewBox="0 0 24 24" class="size-4.5" aria-hidden="true">
+              <path fill="#fff" d="M21.6 12.23c0-.68-.06-1.33-.17-1.96H12v3.7h5.39a4.6 4.6 0 0 1-2 3.02v2.5h3.23c1.89-1.74 2.98-4.3 2.98-7.26Z" />
+              <path fill="#fff" opacity=".85" d="M12 22c2.7 0 4.96-.9 6.62-2.43l-3.23-2.5c-.9.6-2.04.96-3.39.96-2.6 0-4.8-1.76-5.59-4.12H3.07v2.58A10 10 0 0 0 12 22Z" />
+              <path fill="#fff" opacity=".7" d="M6.41 13.91a6 6 0 0 1 0-3.82V7.5H3.07a10 10 0 0 0 0 9l3.34-2.59Z" />
+              <path fill="#fff" opacity=".55" d="M12 5.97c1.47 0 2.79.5 3.83 1.5l2.87-2.87A9.6 9.6 0 0 0 12 2 10 10 0 0 0 3.07 7.5l3.34 2.59C7.2 7.73 9.4 5.97 12 5.97Z" />
+            </svg>
+            Continuar con Google
+          }
+        </button>
+        @if (auth.error()) {
+          <p class="text-destructive text-sm" role="alert">{{ auth.error() }}</p>
+        }
+        <p class="text-muted-foreground text-sm">Tus documentos son privados y solo los ves tú.</p>
+      </div>
+    </section>
+
+    <section aria-label="Ejemplo de respuesta" class="demo">
+      <div class="bg-card border-border rounded-2xl border p-6 shadow-[0_18px_40px_-24px_rgb(30_50_40/0.35)] sm:p-8">
+        <p class="text-muted-foreground mb-5 text-sm">Ejemplo</p>
+        <div class="bg-muted ml-auto w-fit max-w-[85%] rounded-2xl rounded-br-md px-4 py-2.5 text-[0.95rem]">
+          ¿Cuándo vence el plazo de entrega?
+        </div>
+        <p class="mt-6 font-serif text-[1.15rem] leading-[1.65]">
+          El plazo vence el <span class="cited">viernes 14 de marzo a las 23:59</span>
+          <span class="cite-chip">1</span>. Pasada esa hora, cada día de retraso resta un punto
+          <span class="cite-chip">2</span>.
+        </p>
+        <ul class="mt-6 flex flex-wrap gap-2 text-sm">
+          <li class="bg-secondary text-secondary-foreground rounded-full px-3 py-1.5"><b class="font-semibold">1</b> reglamento.pdf · p. 4</li>
+          <li class="bg-secondary text-secondary-foreground rounded-full px-3 py-1.5"><b class="font-semibold">2</b> reglamento.pdf · p. 7</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+</div>

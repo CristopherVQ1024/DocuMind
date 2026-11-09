@@ -1,0 +1,29 @@
+.cite-chip {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.35em;
+  height: 1.35em;
+  padding-inline: 0.3em;
+  margin-inline: 0.1em;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font: 600 0.72rem/1 var(--font-sans);
+  vertical-align: 0.15em;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(4px);
+  }
+}
+
+.intro {
+  animation: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.demo {
+  animation: rise 0.8s 0.12s cubic-bezier(0.16, 1, 0.3, 1) both;
+}

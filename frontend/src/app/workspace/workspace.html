@@ -1,0 +1,53 @@
+<div class="page-width flex h-dvh flex-col">
+  <header class="flex items-center justify-between gap-3 py-4">
+    <div class="flex items-center gap-2.5">
+      <span class="bg-primary text-primary-foreground grid size-8 place-items-center rounded-lg">
+        <ng-icon name="lucideBookOpenText" class="text-base" />
+      </span>
+      <span class="font-serif text-xl font-semibold tracking-tight">DocuMind</span>
+    </div>
+    <div class="flex min-w-0 items-center gap-3">
+      <span class="text-muted-foreground hidden min-w-0 truncate text-sm sm:block">{{ auth.user()?.email }}</span>
+      @if (auth.user(); as user) {
+        @if (user.photo) {
+          <img [src]="user.photo" alt="" referrerpolicy="no-referrer" class="size-8 rounded-full" width="32" height="32" />
+        }
+      }
+      <button hlmBtn variant="ghost" size="sm" (click)="signOut()" aria-label="Cerrar sesión">
+        <ng-icon name="lucideLogOut" />
+        <span class="hidden sm:inline">Salir</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="bg-muted mb-3 grid grid-cols-2 gap-1 rounded-xl p-1 lg:hidden" role="tablist">
+    <button
+      role="tab"
+      [attr.aria-selected]="tab() === 'library'"
+      class="flex items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition-colors"
+      [class]="tab() === 'library' ? 'bg-card shadow-xs' : 'text-muted-foreground'"
+      (click)="tab.set('library')"
+    >
+      <ng-icon name="lucideLibrary" />
+      Biblioteca
+      @if (store.documents().length) {
+        <span class="text-muted-foreground text-xs">{{ store.documents().length }}</span>
+      }
+    </button>
+    <button
+      role="tab"
+      [attr.aria-selected]="tab() === 'chat'"
+      class="flex items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition-colors"
+      [class]="tab() === 'chat' ? 'bg-card shadow-xs' : 'text-muted-foreground'"
+      (click)="tab.set('chat')"
+    >
+      <ng-icon name="lucideMessagesSquare" />
+      Conversación
+    </button>
+  </div>
+
+  <main class="grid min-h-0 flex-1 gap-6 pb-4 lg:grid-cols-[22.5rem_1fr] lg:pb-6">
+    <app-library class="min-h-0" [class.hidden]="tab() !== 'library'" [class.lg:block]="true" />
+    <app-chat class="min-h-0" [class.hidden]="tab() !== 'chat'" [class.lg:block]="true" (goLibrary)="tab.set('library')" />
+  </main>
+</div>

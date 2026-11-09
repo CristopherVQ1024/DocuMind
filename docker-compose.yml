@@ -1,0 +1,50 @@
+name: documind
+
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.17.1
+    container_name: documind-qdrant
+    restart: unless-stopped
+    mem_limit: 512m
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - internal
+
+  backend:
+    build: ./backend
+    container_name: documind-backend
+    restart: unless-stopped
+    mem_limit: 512m
+    env_file: .env
+    environment:
+      QDRANT_URL: http://qdrant:6333
+      DATA_DIR: /app/data
+    volumes:
+      - documind_data:/app/data
+    depends_on:
+      - qdrant
+    networks:
+      - internal
+
+  web:
+    build: ./frontend
+    container_name: documind-web
+    restart: unless-stopped
+    mem_limit: 128m
+    depends_on:
+      - backend
+    ports:
+      - "127.0.0.1:8081:80"
+    networks:
+      - internal
+      - edge
+
+volumes:
+  qdrant_data:
+  documind_data:
+
+networks:
+  internal:
+  edge:
+    external: true

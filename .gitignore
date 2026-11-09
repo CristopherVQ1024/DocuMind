@@ -1,0 +1,10 @@
+.env
+*.json.key
+node_modules
+dist
+.angular
+backend/.venv
+backend/data
+__pycache__
+.pytest_cache
+.impeccable/live

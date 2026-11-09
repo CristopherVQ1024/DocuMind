@@ -1,0 +1,53 @@
+@let m = message();
+@if (m.role === 'user') {
+  <div class="bg-muted ml-auto w-fit max-w-[88%] rounded-2xl rounded-br-md px-4 py-2.5 text-[0.95rem] leading-relaxed break-words whitespace-pre-wrap sm:max-w-[75%]">
+    {{ m.text }}
+  </div>
+} @else {
+  <article class="max-w-[68ch]">
+    @if (!m.text && m.streaming && !m.error) {
+      <p class="text-muted-foreground flex items-center gap-2 text-sm" role="status">
+        <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        {{ m.sources.length ? 'Redactando la respuesta' : 'Buscando en tus documentos' }}
+      </p>
+    }
+    @if (m.text) {
+      <app-answer-text
+        class="answer font-serif text-[1.1rem] leading-[1.7] break-words"
+        [class.streaming]="m.streaming"
+        [text]="m.text"
+        (cite)="toggle($event)"
+      />
+    }
+    @if (m.error) {
+      <p class="text-destructive mt-2 text-sm" role="alert">{{ m.error }}</p>
+    }
+    @if (shown().length) {
+      <ul class="mt-4 flex flex-wrap gap-2" aria-label="Fuentes">
+        @for (s of shown(); track s.n) {
+          <li>
+            <button
+              type="button"
+              class="source"
+              [class.active]="open() === s.n"
+              [attr.aria-expanded]="open() === s.n"
+              (click)="toggle(s.n)"
+            >
+              <b>{{ s.n }}</b>
+              <span class="truncate">{{ s.doc_name }}</span>
+              <span class="text-muted-foreground shrink-0">p. {{ s.page }}</span>
+            </button>
+          </li>
+        }
+      </ul>
+      @for (s of m.sources; track s.n) {
+        @if (open() === s.n) {
+          <blockquote class="passage mt-3 text-sm leading-relaxed">
+            <p class="text-muted-foreground mb-2 text-xs">{{ s.doc_name }} · página {{ s.page }}</p>
+            <span class="cited">{{ s.text }}</span>
+          </blockquote>
+        }
+      }
+    }
+  </article>
+}

@@ -1,0 +1,27 @@
+.page-width {
+  box-sizing: border-box;
+  width: min(100% - 48px, 1390px);
+  margin-inline: auto;
+
+  @media (max-width: 900px) {
+    width: calc(100% - 32px);
+  }
+}
+
+.cited {
+  background: var(--mark);
+  color: var(--mark-foreground);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  padding: 0.05em 0.2em;
+  border-radius: 0.2em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
