@@ -1,21 +1,37 @@
-export type DocStatus = 'indexing' | 'ready' | 'error';
-
-export interface Doc {
+export interface Norma {
   id: string;
-  name: string;
-  size: number;
-  status: DocStatus;
-  pages: number;
-  chunks: number;
-  error: string | null;
-  created_at: number;
+  nombre: string;
+  corto: string;
+  tipo: string;
+  tema: string;
+  publicada: string;
+  url: string;
+  articulos: number;
+}
+
+export interface CorpusEstado {
+  listo: boolean;
+  indexando: boolean;
+  progreso: number;
+  total: number;
+  error: string;
+}
+
+export interface Corpus {
+  normas: Norma[];
+  estado: CorpusEstado;
 }
 
 export interface Source {
   n: number;
-  doc_id: string;
-  doc_name: string;
-  page: number;
+  articulo_id: string;
+  norma_id: string;
+  norma: string;
+  corto: string;
+  etiqueta: string;
+  titulo_articulo: string;
+  ruta: string;
+  url: string;
   text: string;
 }
 

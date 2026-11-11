@@ -14,69 +14,43 @@ def client() -> AsyncQdrantClient:
     return AsyncQdrantClient(url=settings.qdrant_url, api_key=settings.qdrant_api_key or None)
 
 
-async def ensure_collection() -> None:
-    settings = get_settings()
+async def reset_collection(name: str) -> None:
     qdrant = client()
-    if await qdrant.collection_exists(settings.qdrant_collection):
-        return
+    if await qdrant.collection_exists(name):
+        await qdrant.delete_collection(name)
     await qdrant.create_collection(
-        settings.qdrant_collection,
-        vectors_config=models.VectorParams(size=settings.embed_dim, distance=models.Distance.COSINE),
+        name,
+        vectors_config=models.VectorParams(size=get_settings().embed_dim, distance=models.Distance.COSINE),
     )
-    for field in ("user_id", "doc_id"):
-        await qdrant.create_payload_index(
-            settings.qdrant_collection, field, models.PayloadSchemaType.KEYWORD
-        )
+    await qdrant.create_payload_index(name, "norma_id", models.PayloadSchemaType.KEYWORD)
 
 
-async def add_chunks(doc_id: str, user_id: str, doc_name: str, chunks, vectors) -> None:
-    settings = get_settings()
+async def count(name: str) -> int:
+    qdrant = client()
+    if not await qdrant.collection_exists(name):
+        return 0
+    return (await qdrant.count(name, exact=True)).count
+
+
+async def add_points(name: str, items: list[dict], vectors: list[list[float]]) -> None:
     points = [
         models.PointStruct(
-            id=_point_id(doc_id, i),
+            id=str(uuid.uuid5(uuid.NAMESPACE_URL, f"{item['articulo_id']}#{item['chunk_idx']}")),
             vector=vector,
-            payload={
-                "user_id": user_id,
-                "doc_id": doc_id,
-                "doc_name": doc_name,
-                "page": chunk.page,
-                "text": chunk.text,
-            },
+            payload=item,
         )
-        for i, (chunk, vector) in enumerate(zip(chunks, vectors))
+        for item, vector in zip(items, vectors)
     ]
-    for start in range(0, len(points), 100):
-        await client().upsert(settings.qdrant_collection, points[start : start + 100])
+    await client().upsert(name, points)
 
 
-def _point_id(doc_id: str, index: int) -> str:
-    return str(uuid.uuid5(uuid.UUID(doc_id), str(index)))
-
-
-def _filter(user_id: str, doc_ids: list[str] | None) -> models.Filter:
-    must = [models.FieldCondition(key="user_id", match=models.MatchValue(value=user_id))]
-    if doc_ids:
-        must.append(models.FieldCondition(key="doc_id", match=models.MatchAny(any=doc_ids)))
-    return models.Filter(must=must)
-
-
-async def search(vector: list[float], user_id: str, doc_ids: list[str] | None, limit: int) -> list[dict]:
-    result = await client().query_points(
-        get_settings().qdrant_collection,
-        query=vector,
-        query_filter=_filter(user_id, doc_ids),
-        limit=limit,
-        with_payload=True,
-    )
+async def search(name: str, vector: list[float], limit: int) -> list[dict]:
+    result = await client().query_points(name, query=vector, limit=limit, with_payload=True)
     return [{**p.payload, "score": p.score} for p in result.points]
 
 
-async def delete_document(doc_id: str) -> None:
-    await client().delete(
-        get_settings().qdrant_collection,
-        points_selector=models.FilterSelector(
-            filter=models.Filter(
-                must=[models.FieldCondition(key="doc_id", match=models.MatchValue(value=doc_id))]
-            )
-        ),
-    )
+async def drop_others(prefix: str, keep: str) -> None:
+    qdrant = client()
+    for c in (await qdrant.get_collections()).collections:
+        if c.name.startswith(prefix) and c.name != keep:
+            await qdrant.delete_collection(c.name)

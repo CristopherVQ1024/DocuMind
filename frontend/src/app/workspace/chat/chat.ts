@@ -24,16 +24,16 @@ import { ChatMessageView } from './chat-message';
 })
 export class Chat {
   protected readonly store = inject(WorkspaceStore);
-  readonly goLibrary = output<void>();
+  readonly goNormas = output<void>();
   protected readonly draft = signal('');
   protected readonly confirmClear = signal(false);
   private clearTimer?: ReturnType<typeof setTimeout>;
   private readonly box = viewChild<ElementRef<HTMLTextAreaElement>>('box');
   private readonly scroller = viewChild<ElementRef<HTMLElement>>('scroller');
   protected readonly suggestions = [
-    'Resume el documento en cinco puntos',
-    '¿Cuáles son las ideas principales?',
-    '¿Qué conclusiones se mencionan?',
+    '¿Qué derechos tengo sobre mis datos personales?',
+    '¿Qué debo hacer si hay una filtración de datos personales?',
+    '¿Qué pena tiene el acceso ilícito a un sistema informático?',
   ];
 
   constructor() {
@@ -48,7 +48,7 @@ export class Chat {
 
   protected send(text = this.draft()) {
     const question = text.trim();
-    if (!question || this.store.asking() || !this.store.readyDocs().length) return;
+    if (!question || this.store.asking() || !this.store.estado().listo) return;
     this.draft.set('');
     const box = this.box()?.nativeElement;
     if (box) box.style.height = '';

@@ -8,7 +8,7 @@
     @if (!m.text && m.streaming && !m.error) {
       <p class="text-muted-foreground flex items-center gap-2 text-sm" role="status">
         <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
-        {{ m.sources.length ? 'Redactando la respuesta' : 'Buscando en tus documentos' }}
+        {{ m.sources.length ? 'Redactando la respuesta' : 'Buscando en las normas' }}
       </p>
     }
     @if (m.text) {
@@ -34,8 +34,8 @@
               (click)="toggle(s.n)"
             >
               <b>{{ s.n }}</b>
-              <span class="truncate">{{ s.doc_name }}</span>
-              <span class="text-muted-foreground shrink-0">p. {{ s.page }}</span>
+              <span class="truncate">{{ s.corto }}</span>
+              <span class="text-muted-foreground shrink-0">{{ s.etiqueta }}</span>
             </button>
           </li>
         }
@@ -43,7 +43,11 @@
       @for (s of m.sources; track s.n) {
         @if (open() === s.n) {
           <blockquote class="passage mt-3 text-sm leading-relaxed">
-            <p class="text-muted-foreground mb-2 text-xs">{{ s.doc_name }} · página {{ s.page }}</p>
+            <p class="text-muted-foreground mb-2 text-xs">
+              {{ s.norma }} · {{ s.etiqueta }}. {{ s.titulo_articulo }}
+              @if (s.ruta) { <br />{{ s.ruta }} }
+              · <a [href]="s.url" target="_blank" rel="noopener noreferrer" class="underline underline-offset-4">fuente oficial</a>
+            </p>
             <span class="cited">{{ s.text }}</span>
           </blockquote>
         }

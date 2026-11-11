@@ -19,11 +19,11 @@ class Settings(BaseSettings):
     dev_auth_bypass: bool = False
 
     data_dir: str = "./data"
-    max_upload_mb: int = 20
-    max_pages: int = 300
-    chunk_chars: int = 1200
-    chunk_overlap: int = 200
-    top_k: int = 6
+    chunk_chars: int = 800
+    chunk_overlap: int = 150
+    top_k: int = 12
+    max_articles: int = 6
+    article_chars: int = 3000
     cors_origins: str = "http://localhost:4200"
 
 

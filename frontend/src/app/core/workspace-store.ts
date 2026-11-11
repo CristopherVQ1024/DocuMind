@@ -1,8 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { HttpErrorResponse } from '@angular/common/http';
 import { toast } from '@spartan-ng/brain/sonner';
 import { Api } from './api';
-import { ChatMessage, Doc } from './models';
+import { ChatMessage, CorpusEstado, Norma } from './models';
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceStore {
@@ -11,30 +10,25 @@ export class WorkspaceStore {
   private abort?: AbortController;
   private nextId = 1;
 
-  readonly documents = signal<Doc[]>([]);
+  readonly normas = signal<Norma[]>([]);
+  readonly estado = signal<CorpusEstado>({ listo: false, indexando: false, progreso: 0, total: 0, error: '' });
   readonly loaded = signal(false);
-  readonly uploading = signal(0);
-  readonly selected = signal<ReadonlySet<string>>(new Set());
   readonly messages = signal<ChatMessage[]>([]);
   readonly asking = signal(false);
 
-  readonly readyDocs = computed(() => this.documents().filter((d) => d.status === 'ready'));
-  readonly scopeCount = computed(() => {
-    const ready = this.readyDocs();
-    const picked = this.selected();
-    return picked.size ? ready.filter((d) => picked.has(d.id)).length : ready.length;
-  });
+  readonly articulos = computed(() => this.normas().reduce((sum, n) => sum + n.articulos, 0));
 
   load() {
-    this.api.listDocuments().subscribe({
-      next: (docs) => {
-        this.documents.set(docs);
+    this.api.corpus().subscribe({
+      next: (corpus) => {
+        this.normas.set(corpus.normas);
+        this.estado.set(corpus.estado);
         this.loaded.set(true);
         this.schedulePoll();
       },
       error: () => {
         this.loaded.set(true);
-        toast.error('No se pudo cargar tu biblioteca');
+        toast.error('No se pudo cargar el corpus');
       },
     });
   }
@@ -66,52 +60,9 @@ export class WorkspaceStore {
 
   private schedulePoll() {
     clearTimeout(this.pollTimer);
-    if (this.documents().some((d) => d.status === 'indexing')) {
-      this.pollTimer = setTimeout(() => this.load(), 2000);
+    if (!this.estado().listo && !this.estado().error) {
+      this.pollTimer = setTimeout(() => this.load(), 3000);
     }
-  }
-
-  upload(files: File[]) {
-    for (const file of files) {
-      if (!file.name.toLowerCase().endsWith('.pdf')) {
-        toast.error(`${file.name} no es un PDF`);
-        continue;
-      }
-      this.uploading.update((n) => n + 1);
-      this.api.upload(file).subscribe({
-        next: (doc) => {
-          this.documents.update((docs) => [doc, ...docs]);
-          this.uploading.update((n) => n - 1);
-          this.schedulePoll();
-        },
-        error: (e: HttpErrorResponse) => {
-          this.uploading.update((n) => n - 1);
-          toast.error(`${file.name}: ${e.error?.detail ?? 'no se pudo subir'}`);
-        },
-      });
-    }
-  }
-
-  remove(id: string) {
-    this.api.remove(id).subscribe({
-      next: () => {
-        this.documents.update((docs) => docs.filter((d) => d.id !== id));
-        this.selected.update((s) => new Set([...s].filter((x) => x !== id)));
-      },
-      error: () => toast.error('No se pudo borrar el documento'),
-    });
-  }
-
-  toggle(id: string) {
-    this.selected.update((s) => {
-      const next = new Set(s);
-      if (!next.delete(id)) next.add(id);
-      return next;
-    });
-  }
-
-  clearSelection() {
-    this.selected.set(new Set());
   }
 
   async ask(question: string) {
@@ -138,7 +89,7 @@ export class WorkspaceStore {
       this.messages.update((list) => list.map((m) => (m.id === reply.id ? fn(m) : m)));
     try {
       const stream = this.api.chat(
-        { question, doc_ids: [...this.selected()], history },
+        { question, history },
         this.abort.signal,
       );
       for await (const ev of stream) {
@@ -162,9 +113,8 @@ export class WorkspaceStore {
 
   reset() {
     this.stop();
-    this.documents.set([]);
+    this.normas.set([]);
     this.messages.set([]);
-    this.selected.set(new Set());
     this.loaded.set(false);
     this.asking.set(false);
   }

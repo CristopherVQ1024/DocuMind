@@ -23,15 +23,15 @@
   <div class="bg-muted mb-3 grid grid-cols-2 gap-1 rounded-xl p-1 lg:hidden" role="tablist">
     <button
       role="tab"
-      [attr.aria-selected]="tab() === 'library'"
+      [attr.aria-selected]="tab() === 'normas'"
       class="flex items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition-colors"
-      [class]="tab() === 'library' ? 'bg-card shadow-xs' : 'text-muted-foreground'"
-      (click)="tab.set('library')"
+      [class]="tab() === 'normas' ? 'bg-card shadow-xs' : 'text-muted-foreground'"
+      (click)="tab.set('normas')"
     >
-      <ng-icon name="lucideLibrary" />
-      Biblioteca
-      @if (store.documents().length) {
-        <span class="text-muted-foreground text-xs">{{ store.documents().length }}</span>
+      <ng-icon name="lucideScale" />
+      Normas
+      @if (store.normas().length) {
+        <span class="text-muted-foreground text-xs">{{ store.normas().length }}</span>
       }
     </button>
     <button
@@ -47,7 +47,7 @@
   </div>
 
   <main class="grid min-h-0 flex-1 gap-6 pb-4 lg:grid-cols-[22.5rem_1fr] lg:pb-6">
-    <app-library class="min-h-0" [class.hidden]="tab() !== 'library'" [class.lg:block]="true" />
-    <app-chat class="min-h-0" [class.hidden]="tab() !== 'chat'" [class.lg:block]="true" (goLibrary)="tab.set('library')" />
+    <app-normas class="min-h-0" [class.hidden]="tab() !== 'normas'" [class.lg:block]="true" />
+    <app-chat class="min-h-0" [class.hidden]="tab() !== 'chat'" [class.lg:block]="true" (goNormas)="tab.set('normas')" />
   </main>
 </div>

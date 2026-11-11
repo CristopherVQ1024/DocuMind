@@ -1,11 +1,4 @@
 import re
-from dataclasses import dataclass
-
-
-@dataclass
-class Chunk:
-    text: str
-    page: int
 
 
 def split_text(text: str, size: int, overlap: int) -> list[str]:
@@ -21,7 +14,7 @@ def split_text(text: str, size: int, overlap: int) -> list[str]:
         end = min(start + size, len(text))
         if end < len(text):
             window = text[start:end]
-            cut = max(window.rfind("\n\n"), window.rfind(". "), window.rfind("\n"))
+            cut = max(window.rfind("\n"), window.rfind(". "), window.rfind("; "))
             if cut > size * 0.5:
                 end = start + cut + 1
         piece = text[start:end].strip()
@@ -31,11 +24,3 @@ def split_text(text: str, size: int, overlap: int) -> list[str]:
             break
         start = max(end - overlap, start + 1)
     return pieces
-
-
-def chunk_pages(pages: list[str], size: int, overlap: int) -> list[Chunk]:
-    chunks: list[Chunk] = []
-    for number, text in enumerate(pages, start=1):
-        for piece in split_text(text, size, overlap):
-            chunks.append(Chunk(text=piece, page=number))
-    return chunks

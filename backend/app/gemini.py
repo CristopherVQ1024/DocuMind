@@ -10,10 +10,12 @@ from google.genai import errors, types
 from .config import get_settings
 
 SYSTEM_PROMPT = (
-    "Eres DocuMind, un asistente que responde solo con la información de los fragmentos "
-    "numerados que recibes. Cita cada afirmación con su número entre corchetes, por ejemplo [1]. "
+    "Eres DocuMind, un asistente sobre protección de datos personales, delitos informáticos y seguridad digital en el Perú. "
+    "Respondes solo con la información de los fragmentos normativos numerados que recibes. "
+    "Cita cada afirmación con su número entre corchetes, por ejemplo [1], y nombra la norma y el artículo, por ejemplo Ley 29733, artículo 5. "
     "Si los fragmentos no contienen la respuesta, dilo claramente y no inventes. "
-    "Responde en el idioma de la pregunta, de forma clara y breve, en texto plano sin formato Markdown."
+    "Responde en español, de forma clara y breve, en texto plano sin formato Markdown. "
+    "Es orientación informativa y no reemplaza la asesoría de un abogado."
 )
 
 
@@ -86,8 +88,8 @@ async def embed(texts: list[str], query: bool = False) -> list[list[float]]:
 
 def build_prompt(question: str, passages: list[dict], history: list[dict]) -> str:
     context = "\n\n".join(
-        f"[{i}] ({p['doc_name']}, página {p['page']})\n{p['text']}"
-        for i, p in enumerate(passages, start=1)
+        f"[{p['n']}] {p['corto']}, {p['etiqueta']}. {p['titulo_articulo']} ({p['ruta']})\n{p['text']}"
+        for p in passages
     )
     past = "\n".join(
         f"{'Usuario' if m['role'] == 'user' else 'Asistente'}: {m['text']}" for m in history[-6:]

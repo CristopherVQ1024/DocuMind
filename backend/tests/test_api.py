@@ -1,18 +1,7 @@
-import io
+import time
 
 import pytest
 from fastapi.testclient import TestClient
-from reportlab.pdfgen import canvas
-
-
-def make_pdf(pages: list[str]) -> bytes:
-    buf = io.BytesIO()
-    c = canvas.Canvas(buf)
-    for text in pages:
-        c.drawString(72, 750, text)
-        c.showPage()
-    c.save()
-    return buf.getvalue()
 
 
 @pytest.fixture
@@ -21,10 +10,12 @@ def client(tmp_path, monkeypatch):
     monkeypatch.setenv("QDRANT_URL", ":memory:")
     monkeypatch.setenv("DEV_AUTH_BYPASS", "true")
     monkeypatch.setenv("EMBED_DIM", "8")
-    from app import config, gemini, vectorstore
+    from app import config, gemini, indexer, normas, vectorstore
 
     config.get_settings.cache_clear()
     vectorstore.client.cache_clear()
+    indexer.estado.listo = indexer.estado.indexando = False
+    indexer.estado.error = ""
 
     async def fake_embed(texts, query=False):
         return [[float((hash(t) >> i) % 7 + 1) for i in range(8)] for t in texts]
@@ -38,46 +29,44 @@ def client(tmp_path, monkeypatch):
     from app.main import app
 
     with TestClient(app) as c:
+        for _ in range(100):
+            if c.get("/api/corpus").json()["estado"]["listo"]:
+                break
+            time.sleep(0.1)
         yield c
 
 
-def test_chunking():
-    from app.chunking import chunk_pages
+def test_parser_cubre_todas_las_normas():
+    from app import normas
 
-    chunks = chunk_pages(["a" * 3000, "", "hola mundo"], 1200, 200)
-    assert chunks[-1].page == 3
-    assert all(len(c.text) <= 1200 for c in chunks)
-    assert {c.page for c in chunks} == {1, 3}
-
-
-def test_rejects_non_pdf(client):
-    r = client.post("/api/documents", files={"file": ("x.pdf", b"nope", "application/pdf")})
-    assert r.status_code == 415
+    todas = normas.cargar()
+    assert {n.id for n in todas} >= {"ley-29733", "ds-016-2024-jus", "ley-30096", "ley-30999", "ds-126-2025-pcm"}
+    assert all(len(n.articulos) > 10 for n in todas)
+    ley = next(n for n in todas if n.id == "ley-29733")
+    art = next(a for a in ley.articulos if a.numero == "28")
+    assert "Título" in art.titulo and art.texto
 
 
-def test_upload_index_chat_delete(client):
-    pdf = make_pdf(["Qdrant es una base de datos vectorial.", "Nginx es un proxy inverso."])
-    r = client.post("/api/documents", files={"file": ("guia.pdf", pdf, "application/pdf")})
-    assert r.status_code == 202
-    doc_id = r.json()["id"]
+def test_hijos_conservan_jerarquia():
+    from app import indexer
 
-    docs = client.get("/api/documents").json()
-    assert docs[0]["status"] == "ready" and docs[0]["pages"] == 2
+    items = indexer.trozos()
+    assert items and all(i["embed_text"].startswith(("Ley", "DS")) for i in items)
+    assert max(len(i["text"]) for i in items) <= 800
 
-    with client.stream("POST", "/api/chat", json={"question": "¿Qué es Qdrant?"}) as resp:
+
+def test_corpus_indexado(client):
+    data = client.get("/api/corpus").json()
+    assert data["estado"]["listo"] and data["estado"]["total"] == data["estado"]["progreso"]
+    assert len(data["normas"]) == 5
+
+
+def test_chat_con_citas_y_historial(client):
+    with client.stream("POST", "/api/chat", json={"question": "¿Qué es el consentimiento?"}) as resp:
         body = "".join(resp.iter_text())
     assert "event: sources" in body and "event: token" in body and "event: done" in body
-    assert "guia.pdf" in body
-
     history = client.get("/api/messages").json()
     assert [m["role"] for m in history] == ["user", "assistant"]
-    assert history[1]["text"] == "Según el texto [1]." and history[1]["sources"][0]["doc_name"] == "guia.pdf"
+    assert history[1]["sources"][0]["etiqueta"]
     assert client.delete("/api/messages").status_code == 204
     assert client.get("/api/messages").json() == []
-
-    assert client.delete(f"/api/documents/{doc_id}").status_code == 204
-    assert client.get("/api/documents").json() == []
-
-
-def test_chat_without_documents(client):
-    assert client.post("/api/chat", json={"question": "hola"}).status_code == 409

@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth';
-import { Doc, Source, StreamEvent } from './models';
+import { Corpus, Source, StreamEvent } from './models';
 
 export interface StoredMessage {
   role: 'user' | 'assistant';
@@ -13,7 +13,6 @@ export interface StoredMessage {
 
 interface ChatBody {
   question: string;
-  doc_ids: string[];
   history: { role: string; text: string }[];
 }
 
@@ -23,18 +22,8 @@ export class Api {
   private readonly auth = inject(AuthService);
   private readonly base = environment.apiUrl;
 
-  listDocuments() {
-    return this.http.get<Doc[]>(`${this.base}/documents`);
-  }
-
-  upload(file: File) {
-    const form = new FormData();
-    form.append('file', file, file.name);
-    return this.http.post<Doc>(`${this.base}/documents`, form);
-  }
-
-  remove(id: string) {
-    return this.http.delete<void>(`${this.base}/documents/${id}`);
+  corpus() {
+    return this.http.get<Corpus>(`${this.base}/corpus`);
   }
 
   listMessages() {

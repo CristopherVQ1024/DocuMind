@@ -4,6 +4,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 COPY app ./app
+COPY corpus ./corpus
 RUN useradd -m appuser && mkdir -p /app/data && chown -R appuser /app/data
 USER appuser
 EXPOSE 8000
