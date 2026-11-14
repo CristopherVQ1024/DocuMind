@@ -36,6 +36,9 @@
               <b>{{ s.n }}</b>
               <span class="truncate">{{ s.corto }}</span>
               <span class="text-muted-foreground shrink-0">{{ s.etiqueta }}</span>
+              @if (s.estado && s.estado !== 'vigente') {
+                <span class="text-destructive shrink-0">{{ estados[s.estado] }}</span>
+              }
             </button>
           </li>
         }
@@ -46,8 +49,13 @@
             <p class="text-muted-foreground mb-2 text-xs">
               {{ s.norma }} · {{ s.etiqueta }}. {{ s.titulo_articulo }}
               @if (s.ruta) { <br />{{ s.ruta }} }
-              · <a [href]="s.url" target="_blank" rel="noopener noreferrer" class="underline underline-offset-4">fuente oficial</a>
+              @if (s.url) {
+                · <a [href]="s.url" target="_blank" rel="noopener noreferrer" class="underline underline-offset-4">fuente oficial</a>
+              }
             </p>
+            @if (s.estado && s.estado !== 'vigente' && s.vigencia) {
+              <p class="text-destructive mb-2 text-xs">{{ s.vigencia }}</p>
+            }
             <span class="cited">{{ s.text }}</span>
           </blockquote>
         }

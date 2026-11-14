@@ -31,9 +31,9 @@ export class Chat {
   private readonly box = viewChild<ElementRef<HTMLTextAreaElement>>('box');
   private readonly scroller = viewChild<ElementRef<HTMLElement>>('scroller');
   protected readonly suggestions = [
-    '¿Qué derechos tengo sobre mis datos personales?',
-    '¿Qué debo hacer si hay una filtración de datos personales?',
-    '¿Qué pena tiene el acceso ilícito a un sistema informático?',
+    '¿Cuántos días de vacaciones me corresponden al año?',
+    '¿Cómo se calcula la indemnización por despido arbitrario?',
+    '¿Qué regía en 2001 sobre la duración del periodo de prueba?',
   ];
 
   constructor() {

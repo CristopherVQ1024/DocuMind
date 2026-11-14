@@ -26,9 +26,9 @@
           </p>
           <button hlmBtn variant="outline" class="mt-6 w-fit lg:hidden" (click)="goNormas.emit()">Ver las normas</button>
         } @else {
-          <h2 class="font-serif text-3xl leading-tight font-medium tracking-tight text-balance">Pregunta sobre protección de datos en el Perú</h2>
+          <h2 class="font-serif text-3xl leading-tight font-medium tracking-tight text-balance">Pregunta sobre derecho laboral peruano</h2>
           <p class="text-muted-foreground mt-3 max-w-[48ch] leading-relaxed text-pretty">
-            Cada respuesta cita la norma y el artículo del que sale.
+            Cada respuesta cita la norma y el artículo del que sale, y avisa si ese artículo no regía en la fecha que preguntas.
           </p>
           <ul class="mt-6 flex flex-col items-start gap-2">
             @for (s of suggestions; track s) {

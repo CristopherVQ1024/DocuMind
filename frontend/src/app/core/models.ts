@@ -33,6 +33,8 @@ export interface Source {
   ruta: string;
   url: string;
   text: string;
+  estado?: 'vigente' | 'sin_version' | 'no_existia' | 'derogado';
+  vigencia?: string;
 }
 
 export interface ChatMessage {

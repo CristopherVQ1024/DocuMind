@@ -1,9 +1,10 @@
-from . import gemini, indexer, normas, vectorstore
+from . import gemini, indexer, normas, vectorstore, vigencia
 from .config import get_settings
 
 
 async def recuperar(pregunta: str) -> list[dict]:
     settings = get_settings()
+    fecha, _ = vigencia.fecha_referencia(pregunta)
     vector = (await gemini.embed([pregunta], query=True))[0]
     golpes = await vectorstore.search(indexer.coleccion(), vector, settings.top_k)
     mejores: dict[str, float] = {}
@@ -17,6 +18,7 @@ async def recuperar(pregunta: str) -> list[dict]:
         articulo = por_id[articulo_id]
         norma = normas_por_id[articulo.norma_id]
         texto = articulo.texto
+        estado, nota = vigencia.linea(articulo, fecha)
         if len(texto) > settings.article_chars:
             texto = texto[: settings.article_chars].rsplit(" ", 1)[0] + " …"
         fuentes.append(
@@ -32,6 +34,8 @@ async def recuperar(pregunta: str) -> list[dict]:
                 "url": norma.url,
                 "score": round(mejores[articulo_id], 4),
                 "text": texto,
+                "estado": estado,
+                "vigencia": nota,
             }
         )
     return fuentes

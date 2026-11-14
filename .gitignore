@@ -8,3 +8,6 @@ backend/data
 __pycache__
 .pytest_cache
 .impeccable/live
+eval/.venv
+eval/cache
+eval/runs/*/raw

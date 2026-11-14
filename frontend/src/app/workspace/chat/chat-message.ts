@@ -13,6 +13,12 @@ import { AnswerText } from './answer-text';
 export class ChatMessageView {
   readonly message = input.required<ChatMessage>();
   protected readonly open = signal<number | null>(null);
+  protected readonly estados = {
+    vigente: 'vigente',
+    sin_version: 'otra redacción',
+    no_existia: 'no existía',
+    derogado: 'derogado',
+  };
 
   protected readonly shown = computed(() => {
     const m = this.message();

@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="540" viewBox="0 0 1400 540" font-family="Liberation Sans, Arial, sans-serif">
+  <defs>
+    <marker id="f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#222"/>
+    </marker>
+    <marker id="fa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1f5fa8"/>
+    </marker>
+  </defs>
+  <rect width="1400" height="540" fill="#fff"/>
+
+  <g stroke="#222" stroke-width="2" fill="#f4f4f4">
+    <rect x="20" y="70" width="150" height="80" rx="8" fill="#fff"/>
+    <rect x="210" y="70" width="190" height="80" rx="8"/>
+    <rect x="440" y="40" width="190" height="60" rx="8"/>
+    <rect x="440" y="120" width="190" height="60" rx="8"/>
+    <rect x="670" y="70" width="150" height="80" rx="8"/>
+    <rect x="860" y="70" width="240" height="80" rx="8"/>
+  </g>
+  <g font-size="18" fill="#222" text-anchor="middle">
+    <text x="95" y="117" font-weight="bold">Pregunta</text>
+    <text x="305" y="105" font-weight="bold">Fecha de</text>
+    <text x="305" y="128" font-weight="bold">referencia t</text>
+    <text x="535" y="76" font-weight="bold">BM25</text>
+    <text x="535" y="148" font-weight="bold">Denso</text>
+    <text x="535" y="168" font-size="14" fill="#555">bge-m3</text>
+    <text x="745" y="107" font-weight="bold">RRF</text>
+    <text x="745" y="130" font-size="15" fill="#555">k = 60</text>
+    <text x="980" y="105" font-weight="bold">Reordenador</text>
+    <text x="980" y="128" font-size="15" fill="#555">40 artículos completos</text>
+  </g>
+  <g stroke="#222" stroke-width="2" fill="none">
+    <line x1="170" y1="110" x2="207" y2="110" marker-end="url(#f)"/>
+    <polyline points="400,110 420,110 420,70 437,70" marker-end="url(#f)"/>
+    <polyline points="420,110 420,150 437,150" marker-end="url(#f)"/>
+    <polyline points="630,70 650,70 650,110 667,110" marker-end="url(#f)"/>
+    <polyline points="630,150 650,150 650,110"/>
+    <line x1="820" y1="110" x2="857" y2="110" marker-end="url(#f)"/>
+    <line x1="980" y1="150" x2="980" y2="272" marker-end="url(#f)"/>
+  </g>
+  <text x="990" y="215" font-size="15" fill="#555">puntaje s₁</text>
+
+  <polygon points="980,275 1090,330 980,385 870,330" fill="#e3edf9" stroke="#1f5fa8" stroke-width="2.5"/>
+  <text x="980" y="325" font-size="18" fill="#1f5fa8" font-weight="bold" text-anchor="middle">Compuerta</text>
+  <text x="980" y="348" font-size="16" fill="#1f5fa8" text-anchor="middle">s₁ &lt; τ</text>
+
+  <rect x="1170" y="295" width="200" height="70" rx="8" fill="#fff" stroke="#222" stroke-width="2"/>
+  <text x="1270" y="327" font-size="18" fill="#222" font-weight="bold" text-anchor="middle">Abstención</text>
+  <text x="1270" y="349" font-size="14" fill="#555" text-anchor="middle">sin llamar al generador</text>
+  <line x1="1090" y1="330" x2="1167" y2="330" stroke="#222" stroke-width="2" marker-end="url(#f)"/>
+  <text x="1120" y="320" font-size="16" fill="#222">sí</text>
+
+  <line x1="870" y1="330" x2="843" y2="330" stroke="#222" stroke-width="2" marker-end="url(#f)"/>
+  <text x="846" y="320" font-size="16" fill="#222">no</text>
+
+  <rect x="600" y="285" width="240" height="90" rx="8" fill="#e3edf9" stroke="#1f5fa8" stroke-width="2.5"/>
+  <text x="720" y="318" font-size="18" fill="#1f5fa8" font-weight="bold" text-anchor="middle">Etiquetado σ(a, t)</text>
+  <text x="720" y="341" font-size="15" fill="#1f5fa8" text-anchor="middle">5 primeros artículos con</text>
+  <text x="720" y="361" font-size="15" fill="#1f5fa8" text-anchor="middle">estado, último cambio e historial</text>
+
+  <polyline points="305,150 305,240 720,240 720,282" fill="none" stroke="#1f5fa8" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#fa)"/>
+  <text x="510" y="232" font-size="15" fill="#1f5fa8">t</text>
+
+  <path d="M600,445 a120,14 0 0,0 240,0 v50 a120,14 0 0,1 -240,0 z" fill="#f4f4f4" stroke="#222" stroke-width="2"/>
+  <ellipse cx="720" cy="445" rx="120" ry="14" fill="#fff" stroke="#222" stroke-width="2"/>
+  <text x="720" y="482" font-size="16" fill="#222" font-weight="bold" text-anchor="middle">Metadatos de vigencia</text>
+  <text x="720" y="502" font-size="13" fill="#555" text-anchor="middle">notas del compendio MTPE</text>
+  <line x1="720" y1="430" x2="720" y2="378" stroke="#222" stroke-width="2" marker-end="url(#f)"/>
+
+  <line x1="600" y1="330" x2="553" y2="330" stroke="#222" stroke-width="2" marker-end="url(#f)"/>
+  <rect x="330" y="285" width="220" height="90" rx="8" fill="#f4f4f4" stroke="#222" stroke-width="2"/>
+  <text x="440" y="320" font-size="18" fill="#222" font-weight="bold" text-anchor="middle">Generador</text>
+  <text x="440" y="343" font-size="15" fill="#555" text-anchor="middle">Llama 3.1 8B</text>
+  <text x="440" y="362" font-size="15" fill="#555" text-anchor="middle">Gemma 3 12B</text>
+
+  <line x1="330" y1="330" x2="283" y2="330" stroke="#222" stroke-width="2" marker-end="url(#f)"/>
+  <rect x="20" y="260" width="260" height="140" rx="8" fill="#fff" stroke="#222" stroke-width="2"/>
+  <text x="150" y="290" font-size="18" fill="#222" font-weight="bold" text-anchor="middle">Salida JSON</text>
+  <g font-size="15" fill="#555">
+    <text x="42" y="318">respuesta</text>
+    <text x="42" y="340">pasajes citados</text>
+    <text x="42" y="362">estado</text>
+    <text x="42" y="384">norma modificatoria</text>
+  </g>
+
+  <rect x="20" y="440" width="530" height="62" rx="8" fill="none" stroke="#555" stroke-width="1.5" stroke-dasharray="6 5"/>
+  <text x="285" y="466" font-size="15" fill="#333" text-anchor="middle">Variante con estado determinista: el estado se toma</text>
+  <text x="285" y="488" font-size="15" fill="#333" text-anchor="middle">de σ(a, t) del primer artículo citado</text>
+  <line x1="150" y1="440" x2="150" y2="403" stroke="#555" stroke-width="1.5" stroke-dasharray="6 5" marker-end="url(#f)"/>
+</svg>

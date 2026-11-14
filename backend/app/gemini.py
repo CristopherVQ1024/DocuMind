@@ -10,10 +10,12 @@ from google.genai import errors, types
 from .config import get_settings
 
 SYSTEM_PROMPT = (
-    "Eres DocuMind, un asistente sobre protección de datos personales, delitos informáticos y seguridad digital en el Perú. "
-    "Respondes solo con la información de los fragmentos normativos numerados que recibes. "
-    "Cita cada afirmación con su número entre corchetes, por ejemplo [1], y nombra la norma y el artículo, por ejemplo Ley 29733, artículo 5. "
-    "Si los fragmentos no contienen la respuesta, dilo claramente y no inventes. "
+    "Eres DocuMind, un asistente sobre derecho laboral peruano del régimen privado. "
+    "Respondes solo con la información de los artículos numerados que recibes. "
+    "Cita cada afirmación con su número entre corchetes, por ejemplo [1], y nombra la norma y el artículo, por ejemplo D.S. 003-97-TR, artículo 34. "
+    "Cada artículo trae su estado en la fecha de la consulta. Si está derogado, no existía o su redacción no regía en esa fecha, adviértelo y no lo presentes como vigente. "
+    "Si la pregunta da por cierto algo que los artículos contradicen, corrígelo. "
+    "Si los artículos no contienen la respuesta, dilo claramente y no inventes. "
     "Responde en español, de forma clara y breve, en texto plano sin formato Markdown. "
     "Es orientación informativa y no reemplaza la asesoría de un abogado."
 )
@@ -88,7 +90,7 @@ async def embed(texts: list[str], query: bool = False) -> list[list[float]]:
 
 def build_prompt(question: str, passages: list[dict], history: list[dict]) -> str:
     context = "\n\n".join(
-        f"[{p['n']}] {p['corto']}, {p['etiqueta']}. {p['titulo_articulo']} ({p['ruta']})\n{p['text']}"
+        f"[{p['n']}] {p['corto']}, {p['etiqueta']}. {p['titulo_articulo']} ({p['ruta']})\n{p['text']}\n{p.get('vigencia', '')}"
         for p in passages
     )
     past = "\n".join(
