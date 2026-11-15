@@ -1,6 +1,6 @@
 # Benchmark temporal y RAG con restricción de vigencia para pregunta-respuesta sobre normas laborales peruanas
 
-**Abstract.** Retrieval-augmented generation (RAG) for legal questions usually assumes that every retrieved provision is in force, an assumption that fails for statutes that are amended and repealed over time. We present a temporal-aware benchmark of 510 Spanish questions, retained from 596 after removing defective items, over 135 Peruvian private-sector labor norms. It covers literal, temporal, amendment-tracing, multi-hop, false-premise and unanswerable questions, with validity states derived deterministically from the editorial notes of the official compendium. We also propose a validity-constrained RAG that annotates each retrieved article with its state at the date implied by the question and abstains below a threshold calibrated on a development split. On 414 test questions, a hybrid retriever with reranking reached nDCG@10 of 0.835, against 0.611 for a replica of a metadata-aware legal RAG on the same corpus, whose LLM-extracted filters discarded the correct article in most temporal questions. Without validity metadata, generators answered «in force» in 80–94 % of questions about provisions that were not. Small open generators (Llama 3.1 8B, Gemma 3 12B) used the validity line to trace amendments (0.83–0.86 vs 0.13) but ignored it when stating validity; taking the state from the deterministic function raised state accuracy from 0.32 to 0.56 and cut anachronisms from 0.72 to 0.35 with Llama (McNemar, Holm-adjusted p < 10⁻⁷). The abstention gate raised abstention F1 from 0.34 to 0.76. An LLM judge proved insensitive to temporal validity, which supports deterministic temporal metrics.
+**Abstract.** Retrieval-augmented generation (RAG) for legal questions usually assumes that every retrieved provision is in force, an assumption that fails for statutes that are amended and repealed over time. We present a temporal-aware benchmark of 510 Spanish questions, retained from 596 after removing defective items, over 135 Peruvian private-sector labor norms. It covers literal, temporal, amendment-tracing, multi-hop, false-premise and unanswerable questions, with validity states derived deterministically from the editorial notes of the official compendium. We also propose a validity-constrained RAG that annotates each retrieved article with its state at the date implied by the question and abstains below a threshold calibrated on a development split. On 414 test questions, a hybrid retriever with reranking reached nDCG@10 of 0.835, against 0.611 for a replica of a metadata-aware legal RAG on the same corpus, whose LLM-extracted filters discarded the correct article in most temporal questions. Without validity metadata, generators answered “in force” in 80–94 % of questions about provisions that were not. Small open generators (Llama 3.1 8B, Gemma 3 12B) used the validity line to trace amendments (0.83–0.86 vs 0.13) but ignored it when stating validity; taking the state from the deterministic function raised state accuracy from 0.32 to 0.56 and cut anachronisms from 0.72 to 0.35 with Llama (McNemar, Holm-adjusted p < 10⁻⁷). The abstention gate raised abstention F1 from 0.34 to 0.76. An LLM judge proved insensitive to temporal validity, which supports deterministic temporal metrics.
 
 **Keywords.** retrieval-augmented generation, legal question answering, temporal validity, benchmark, abstention, Spanish, labor law
 
@@ -22,7 +22,7 @@ El objetivo de este trabajo fue construir un benchmark temporal de pregunta-resp
 
 La búsqueda se hizo en Scopus para 2024–2026, con términos sobre RAG legal, pregunta-respuesta temporal, abstención y evaluación de RAG. De 99 registros se descartaron los que no trataban RAG ni QA (lógica difusa, imágenes médicas, bases de datos). Quedaron 31, agrupados en cuatro ejes: RAG sobre normas estructuradas, vigencia y tiempo, benchmarks legales y de abstención, y evaluación. Ninguno de los 99 resúmenes trabaja con español ni con normativa latinoamericana. La Tabla I resume los trabajos más cercanos.
 
-**Tabla I.** Trabajos relacionados {ancha}
+**Tabla I.** Trabajos relacionados {ancha} {anchos=13,15,17,15,19,8,7,6}
 
 | Ref. | Ámbito y datos | Método | Validación | Resultado clave | Temporal | Abstención | Español |
 |---|---|---|---|---|---|---|---|
@@ -74,7 +74,7 @@ La investigación es aplicada, de tipo tecnológico, con enfoque cuantitativo y 
 
 El trabajo tuvo cuatro fases (Fig. 1): corpus con metadatos de vigencia, construcción y validación del benchmark, implementación de sistemas y líneas base, y evaluación. Las semillas, los modelos y los comandos para reproducir cada tabla están en el repositorio.
 
-![Fig. 1](figuras/fig1_fases.png)
+![Fig. 1](figuras/fig1_fases.png) {ancha}
 
 **Fig. 1.** Fases de la investigación: corpus con metadatos de vigencia, benchmark, sistemas y evaluación.
 
@@ -82,7 +82,7 @@ El trabajo tuvo cuatro fases (Fig. 1): corpus con metadatos de vigencia, constru
 
 El corpus es el compendio de normas laborales del régimen privado del MTPE, actualizado al 21 de octubre de 2024, con 1 811 páginas [16]. Es uno de los tres compendios que usó Tacna, junto con la Constitución [17]. Un analizador propio reconoce el índice (tipo, número, fecha y tema de cada norma), los encabezados de artículo y disposición, las sumillas y las notas que el compendio pone después de cada artículo modificado, incorporado o derogado. De cada nota se extraen la acción, la norma que la produjo y su fecha. Resultan 135 normas, 3 476 artículos y disposiciones y 678 notas con fecha y norma: 477 modificaciones, 165 incorporaciones y 36 derogaciones. Hay 430 artículos modificados y 25 derogados (Tabla II).
 
-**Tabla II.** Composición del corpus
+**Tabla II.** Composición del corpus {anchos=70,30}
 
 | Indicador | Valor |
 |---|---|
@@ -94,7 +94,7 @@ El corpus es el compendio de normas laborales del régimen privado del MTPE, act
 
 Todo corre en local, en una GPU RTX 5080 de 16 GB. Los embeddings son de bge-m3 [33] y el reordenador es jina-reranker-v2-base-multilingual; la réplica de Tacna usa all-MiniLM-L6-v2. Se evaluaron dos generadores de pesos abiertos servidos con Ollama, Llama 3.1 8B y Gemma 3 12B, con temperatura 0, semilla 7 y contexto de 12 288 tokens. GPT-OSS 20B redactó parte de las preguntas y actúa de juez (Tabla III).
 
-**Tabla III.** Tecnologías
+**Tabla III.** Tecnologías {anchos=30,70}
 
 | Componente | Herramienta |
 |---|---|
@@ -149,7 +149,7 @@ $$
 
 donde *y*~t~ es el año de referencia (o el actual), *y*~v(a)~ es el año de *v*(*a*), 36 normaliza por el rango de años del corpus y λ = 0.15. La réplica de Tacna sigue su código público [17]: corrección ortográfica y extracción de filtros (artículo, norma y año) con Llama 3.1 8B, relajación de filtros, 15 fragmentos densos y reordenamiento a cinco.
 
-**Tabla IV.** Sistemas evaluados
+**Tabla IV.** Sistemas evaluados {anchos=32,68}
 
 | Sistema | Descripción |
 |---|---|
@@ -220,7 +220,7 @@ La depuración retiró 86 preguntas: 34 de premisa falsa (20 sin trámite identi
 
 El benchmark depurado tiene 510 preguntas (Tabla V), 96 de desarrollo y 414 de prueba. De las temporales, 48 piden una fecha en que la redacción actual aún no regía, 20 una fecha anterior a la existencia del artículo y 50 una fecha en que la redacción sí regía. De premisa falsa quedan 55 con cifra alterada y una sobre un artículo derogado. Las 101 preguntas retenidas de la muestra son válidas por construcción, así que esa cifra no estima el error que pueda quedar en las literales y temporales no muestreadas.
 
-**Tabla V.** Composición del benchmark
+**Tabla V.** Composición del benchmark {anchos=18,10,13,17,42}
 
 | Tipo | Total | Prueba | Excluidas | Redacción |
 |---|---|---|---|---|
@@ -236,7 +236,7 @@ El benchmark depurado tiene 510 preguntas (Tabla V), 96 de desarrollo y 414 de p
 
 La Tabla VI resume la recuperación en las 353 preguntas de prueba que tienen artículos de oro. El híbrido con reordenamiento alcanzó 0.835 de nDCG@10 y 0.907 de Recall@5. La réplica de Tacna obtuvo 0.611 con bge-m3 y 0.412 con MiniLM, y el RAG ingenuo, 0.521. En recuperación, recencia y propuesto no se distinguen del híbrido con reordenamiento. El propuesto usa el mismo ranking y solo agrega la etiqueta de vigencia; la penalización por recencia movió el nDCG@10 en +0.008 (IC 95 % [−0.003, 0.018], p Holm = 0.84).
 
-**Tabla VI.** Recuperación en la partición de prueba (n = 353) {ancha}
+**Tabla VI.** Recuperación en la partición de prueba (n = 353) {ancha} {anchos=30,10,10,10,10,10,10,10}
 
 | Sistema | Hit@1 | Recall@5 | Recall@10 | MRR@10 | nDCG@10 | Todos@10 | s/consulta |
 |---|---|---|---|---|---|---|---|
@@ -254,7 +254,7 @@ La Tabla VI resume la recuperación en las 353 preguntas de prueba que tienen ar
 
 La mayor diferencia por tipo de pregunta (Tabla VII) está en las temporales. Tacna recuperó el artículo correcto entre los cinco primeros en 6.2 % de los casos con bge-m3 y en 3.1 % con MiniLM; el híbrido con reordenamiento, en 91.7 %. En 109 de las 120 preguntas temporales originales, el extractor de Tacna convirtió el año de la pregunta en un filtro sobre el año de publicación de la norma, y ese filtro descarta el artículo vigente cuando la norma es de otro año. En rastreo, casi toda la diferencia la explica el encabezado jerárquico: el denso sin encabezado llegó a 0.078 de Recall@5 y con encabezado a 0.359.
 
-**Tabla VII.** Recall@5 por tipo de pregunta
+**Tabla VII.** Recall@5 por tipo de pregunta {anchos=27,12,16,14,18,13}
 
 | Sistema | Literal | Temporal | Rastreo | Multisalto | Premisa falsa |
 |---|---|---|---|---|---|
@@ -270,7 +270,7 @@ La mayor diferencia por tipo de pregunta (Tabla VII) está en las temporales. Ta
 
 La Tabla VIII compara con Wilcoxon el nDCG@10 del híbrido con reordenamiento contra cada sistema. Las diferencias con el ingenuo, BM25, el denso, el híbrido sin reordenar y las dos réplicas de Tacna son significativas tras Holm (p < 10⁻⁷). La expansión al artículo completo no mejoró el reordenamiento por fragmentos (Δ = −0.005, p Holm = 0.61).
 
-**Tabla VIII.** Diferencia de nDCG@10 frente a híbrido + reordenador (Wilcoxon, IC bootstrap 95 %, Holm)
+**Tabla VIII.** Diferencia de nDCG@10 frente a híbrido + reordenador (Wilcoxon, IC bootstrap 95 %, Holm) {anchos=38,15,27,20}
 
 | Sistema | Δ media | IC 95 % | p Holm |
 |---|---|---|---|
@@ -290,7 +290,7 @@ El umbral calibrado en desarrollo fue τ = 0.368, con F1 de abstención de 0.743
 
 La Tabla IX resume la generación con los dos generadores sobre las 414 preguntas de prueba. El estado y el anacronismo se calculan sobre las 139 preguntas temporales y de premisa falsa, y el rastreo sobre las de su tipo. Todas las salidas fueron JSON válido.
 
-**Tabla IX.** Generación por sistema y generador (partición de prueba, n = 414) {ancha}
+**Tabla IX.** Generación por sistema y generador (partición de prueba, n = 414) {ancha} {anchos=21,12,8,8,8,11,8,8,8,8}
 
 | Sistema | Generador | P cita | R cita | Estado ok | Anacronismo ↓ | Rastreo ok | F1 abst. | s/resp. | Tokens |
 |---|---|---|---|---|---|---|---|---|---|
@@ -313,7 +313,7 @@ El sistema propuesto multiplicó por más de seis el rastreo correcto (0.828 y 0
 
 Después de observar este resultado se definió una variante que conserva la respuesta textual del generador y toma el estado de σ(*a*, *t*) para el primer artículo citado (o el primero del contexto), salvo cuando el generador declara premisa falsa o fuera de corpus, o se abstiene. Con ella, la exactitud de estado subió a 0.561 con Llama y 0.518 con Gemma, y el anacronismo bajó a 0.354 y 0.313. La mejora fue significativa frente a todas las líneas base y frente al estado del propio generador, con ambos modelos (McNemar exacto, p Holm ≤ 1.1 × 10⁻³; Tabla X). En las temporales, la variante acertó el estado en 74.0 % (Llama) y 69.8 % (Gemma). El error que queda se concentra en las premisas falsas con cifra alterada: los generadores detectaron 6 y 4 de 42, y en el resto respondieron con el estado del artículo o se abstuvieron. La única premisa falsa de prueba sobre un artículo derogado la resolvió el estado determinista con ambos generadores.
 
-**Tabla X.** Exactitud de estado del propuesto con estado determinista frente a cada sistema (McNemar exacto, Holm, n = 139)
+**Tabla X.** Exactitud de estado del propuesto con estado determinista frente a cada sistema (McNemar exacto, Holm, n = 139) {anchos=26,21,16,21,16}
 
 | Comparación | Llama 3.1 8B | p Holm | Gemma 3 12B | p Holm |
 |---|---|---|---|---|
@@ -328,7 +328,7 @@ Después de observar este resultado se definió una variante que conserva la res
 
 La Tabla XI reúne las ablaciones. En recuperación, el encabezado jerárquico aporta 0.081 de nDCG@10 al denso (0.726 frente a 0.645) y casi toda la recuperación en rastreo. El reordenador aporta 0.120 sobre el híbrido, y la expansión al artículo completo no difiere del reordenamiento por fragmentos (Δ = −0.005, p Holm = 0.61). En generación con Llama, sin la línea de vigencia el rastreo cayó de 0.828 a 0.125 y la precisión de citas de 0.691 a 0.597, mientras que la exactitud de estado del generador quedó igual (0.317). El modelo usa la línea para nombrar la norma modificatoria, pero no para fijar el estado. Sin la compuerta, el F1 de abstención bajó de 0.755 a 0.342 (recall de abstención de 0.885 a 0.213) y la latencia casi se triplicó, porque el generador recibe contexto también en las preguntas sin respuesta.
 
-**Tabla XI.** Ablación de componentes
+**Tabla XI.** Ablación de componentes {anchos=40,30,15,15}
 
 | Componente retirado | Métrica | Con | Sin |
 |---|---|---|---|
@@ -346,7 +346,7 @@ La Tabla XI reúne las ablaciones. En recuperación, el encabezado jerárquico a
 
 El juez calificó 1 197 respuestas: 120 por corrida en diez corridas, menos tres del RAG ingenuo con Llama que no devolvió. De ellas, 947 corresponden a preguntas retenidas, 95 por corrida y 92 en esa corrida. Las notas fueron casi binarias (517 con 2, 373 con 0 y 57 con 1). El propuesto obtuvo la mayor corrección con ambos generadores (Tabla XII), con diferencias de 0.27 a 0.38 en la escala normalizada frente a cada línea base, todas significativas (Wilcoxon, p Holm ≤ 2.4 × 10⁻⁵ con Gemma y ≤ 2.9 × 10⁻⁵ con Llama). La ventaja viene del rastreo (0.72–0.88 frente a 0.00–0.09) y de las preguntas sin respuesta (0.62–1.00 frente a 0.00–0.25). En literales y multisalto todos los sistemas llegan a 0.70, salvo Tacna con MiniLM.
 
-**Tabla XII.** Juez automático, corrección normalizada (0–1) y fidelidad (n = 95 por corrida, 92 en ingenuo con Llama)
+**Tabla XII.** Juez automático, corrección normalizada (0–1) y fidelidad (n = 95 por corrida, 92 en ingenuo con Llama) {anchos=25,20,17,21,17}
 
 | Sistema | Generador | Corrección | Totalmente correcta | Fidelidad |
 |---|---|---|---|---|
@@ -369,7 +369,7 @@ La calificación a ciegas del validador independiente sobre 100 respuestas dio u
 
 La Tabla XIII sitúa los resultados frente a los trabajos más cercanos. Las cifras no son comparables de forma directa, porque cambian los corpus, las preguntas y las métricas; sirven para ver órdenes de magnitud y qué midió cada estudio.
 
-**Tabla XIII.** Comparación con la literatura {ancha}
+**Tabla XIII.** Comparación con la literatura {ancha} {anchos=22,28,18,32}
 
 | Indicador | Este trabajo | Literatura | Observación |
 |---|---|---|---|
