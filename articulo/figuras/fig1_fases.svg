@@ -35,7 +35,7 @@
     <text x="385" y="50" font-size="15" fill="#bbb" font-weight="bold">FASE 2</text>
     <text x="385" y="72" font-size="22" fill="#fff" font-weight="bold">Benchmark</text>
     <g font-size="17" fill="#222">
-      <text x="385" y="122">596 preguntas, 6 tipos</text>
+      <text x="385" y="122">530 preguntas, 6 tipos</text>
       <text x="385" y="145" fill="#555">literal, temporal, rastreo,</text>
       <text x="385" y="168" fill="#555">multisalto, premisa falsa,</text>
       <text x="385" y="191" fill="#555">sin respuesta</text>
@@ -44,8 +44,8 @@
       <text x="385" y="294">Estado oro determinista</text>
     </g>
     <rect x="385" y="322" width="265" height="66" rx="8" fill="#fff" stroke="#222" stroke-width="1.5"/>
-    <text x="517" y="350" font-size="17" fill="#222" font-weight="bold" text-anchor="middle">Desarrollo 109</text>
-    <text x="517" y="374" font-size="17" fill="#222" font-weight="bold" text-anchor="middle">Prueba 487</text>
+    <text x="517" y="350" font-size="17" fill="#222" font-weight="bold" text-anchor="middle">Desarrollo 99</text>
+    <text x="517" y="374" font-size="17" fill="#222" font-weight="bold" text-anchor="middle">Prueba 431</text>
   </g>
 
   <line x1="672" y1="215" x2="708" y2="215" stroke="#222" stroke-width="2.5" marker-end="url(#flecha)"/>

@@ -141,7 +141,7 @@ def seccion_juez(preguntas: dict, salida: list[str], resumen: dict) -> None:
         return
     grupos = defaultdict(list)
     for j in juicios:
-        if particion(j["qid"]) == "test":
+        if j["qid"] in preguntas and particion(j["qid"]) == "test":
             grupos[j["corrida"]].append(j)
     filas_t = []
     for c, v in sorted(grupos.items()):

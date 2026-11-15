@@ -3,6 +3,8 @@ import csv
 import random
 from collections import defaultdict
 
+import numpy as np
+
 from common import DATA, RUNS, articulos, cita, leer_jsonl
 from metricas import cohen_kappa, kappa_ponderado
 
@@ -50,7 +52,23 @@ def leer(ruta) -> list[dict]:
         return list(csv.DictReader(f))
 
 
-def kappas() -> None:
+def resumen_benchmark(ruta, qids=None) -> None:
+    filas = [f for f in leer(ruta) if f["valida_0_1"].strip() and (qids is None or f["qid"] in qids)]
+    if not filas:
+        return
+    tipos = defaultdict(list)
+    for f in filas:
+        tipos[f["tipo"]].append(f)
+    for t, v in tipos.items():
+        print(f"{ruta.stem} {t}: n={len(v)} validas={sum(int(f['valida_0_1']) for f in v) / len(v):.3f} estado={sum(int(f['estado_correcto']) for f in v) / len(v):.3f}")
+    print(f"{ruta.stem} total: n={len(filas)} validas={sum(int(f['valida_0_1']) for f in filas) / len(filas):.3f} estado={sum(int(f['estado_correcto']) for f in filas) / len(filas):.3f}")
+
+
+def kappas(experto: str) -> None:
+    vigentes = {q["qid"] for q in leer_jsonl(DATA / "benchmark.jsonl")}
+    resumen_benchmark(CARPETA / "benchmark_claude.csv")
+    print("tras depurar")
+    resumen_benchmark(CARPETA / "benchmark_claude.csv", vigentes)
     a, b = (leer(CARPETA / f"benchmark_{x}.csv") for x in ("A", "B"))
     pares = [(x, y) for x, y in zip(a, b) if x["valida_0_1"].strip() and y["valida_0_1"].strip()]
     if pares:
@@ -58,20 +76,23 @@ def kappas() -> None:
         vb = [int(y["valida_0_1"]) for _, y in pares]
         acuerdo = sum(x == y == 1 for x, y in zip(va, vb)) / len(pares)
         print(f"benchmark: n={len(pares)} kappa={cohen_kappa(va, vb):.3f} validas_ambos={acuerdo:.3f}")
-    ruta = CARPETA / "juez_experto.csv"
+    ruta = CARPETA / experto
     if ruta.exists():
         juez = {(j["corrida"], j["qid"]): j["correccion"] for j in leer_jsonl(RUNS / "juez" / "juicios.jsonl")}
-        filas = [f for f in leer(ruta) if f["correccion_experto_0_2"].strip()]
-        if filas:
+        todas = [f for f in leer(ruta) if f["correccion_experto_0_2"].strip()]
+        for nombre, filas in (("", todas), (" tras depurar", [f for f in todas if f["qid"] in vigentes])):
+            if not filas:
+                continue
             h = [int(f["correccion_experto_0_2"]) for f in filas]
             m = [juez[(f["corrida"], f["qid"])] for f in filas]
-            print(f"juez contra experto: n={len(filas)} kappa_ponderado={kappa_ponderado(m, h):.3f} acuerdo={sum(x == y for x, y in zip(m, h)) / len(h):.3f}")
+            print(f"juez contra {ruta.stem}{nombre}: n={len(filas)} kappa_ponderado={kappa_ponderado(m, h):.3f} acuerdo={sum(x == y for x, y in zip(m, h)) / len(h):.3f} media_juez={np.mean(m) / 2:.3f} media_anotador={np.mean(h) / 2:.3f}")
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("accion", choices=["benchmark", "juez", "kappa"])
     ap.add_argument("--n", type=int, default=20)
+    ap.add_argument("--experto", default="juez_experto.csv")
     args = ap.parse_args()
     CARPETA.mkdir(parents=True, exist_ok=True)
     if args.accion == "benchmark":
@@ -79,7 +100,7 @@ def main():
     elif args.accion == "juez":
         exportar_juez(args.n)
     else:
-        kappas()
+        kappas(args.experto)
 
 
 if __name__ == "__main__":
