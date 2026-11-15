@@ -39,6 +39,10 @@ NOMBRES_NORMA = {"ley": "Ley", "decreto legislativo": "Decreto Legislativo", "de
 MESES = {m: i for i, m in enumerate(
     "enero febrero marzo abril mayo junio julio agosto septiembre octubre noviembre diciembre".split(), 1)}
 MESES["setiembre"] = 9
+# erratas de fecha en el indice del compendio
+FECHAS_CORREGIDAS = {("LEY", "28518"): "2005-05-24", ("DECRETO LEGISLATIVO", "1410"): "2018-09-12"}
+# normas sin entrada en el indice que quedan dentro del bloque de otra, desde su pagina
+INICIO_INTERNO = {"dleg-1410": (1314, "2015-11-23")}
 CORTO = {
     "DECRETO SUPREMO": "DS", "DECRETO LEGISLATIVO": "D. Leg.", "DECRETO LEY": "DL",
     "DECRETO DE URGENCIA": "DU", "RESOLUCIÓN MINISTERIAL": "RM", "RESOLUCIÓN DE SUPERINTENDENCIA": "RS",
@@ -105,7 +109,7 @@ def indice(pags: dict[int, str]) -> list[dict]:
             {
                 "tipo": tipo,
                 "numero": numero,
-                "publicada": f"{a:04d}-{mes:02d}-{d:02d}",
+                "publicada": FECHAS_CORREGIDAS.get((tipo, numero), f"{a:04d}-{mes:02d}-{d:02d}"),
                 "pagina": int(m.group(6)),
                 "nombre": " ".join(partes).strip(),
                 "tema": tema.strip().capitalize(),
@@ -284,8 +288,9 @@ def parsear(entrada: dict, texto: str, pagina_de) -> Norma:
         )
         norma.articulos.append(art)
     asignar_ids(norma)
+    pagina_interna, fecha_interna = INICIO_INTERNO.get(norma.id, (0, ""))
     for art in norma.articulos:
-        vigencia(art, norma.publicada)
+        vigencia(art, fecha_interna if pagina_interna and art.pagina >= pagina_interna else norma.publicada)
     return norma
 
 

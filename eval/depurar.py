@@ -14,6 +14,10 @@ MOTIVOS = {
     "parcial": "incorporacion o derogacion de un elemento parcial descrita como del articulo entero",
     "ref_fuera_oro": "la respuesta de referencia afirma contenido ausente en los articulos oro",
     "respondible": "el corpus contiene normas generales que responden la pregunta",
+    "ref_contradice": "la respuesta de referencia contradice los articulos oro",
+    "rol": "la respuesta atribuye al sujeto de la pregunta deberes que los articulos asignan a otro",
+    "remision": "la remision del articulo apunta a otra norma distinta del articulo oro enlazado",
+    "fecha_erronea": "estado oro calculado con una fecha de publicacion erronea del indice del compendio",
 }
 
 EXCLUIR = {
@@ -26,7 +30,12 @@ EXCLUIR = {
     "varias_normas": ["q0247", "q0269", "q0273", "q0275", "q0293", "q0295", "q0296", "q0300", "q0312", "q0314",
                       "q0320"],
     "parcial": ["q0294", "q0297", "q0299", "q0304", "q0307"],
-    "ref_fuera_oro": ["q0364", "q0392"],
+    "ref_fuera_oro": ["q0364", "q0392", "q0361", "q0389", "q0395"],
+    "ref_contradice": ["q0333", "q0335", "q0345", "q0350", "q0356", "q0359", "q0362", "q0366", "q0367", "q0368",
+                       "q0397"],
+    "rol": ["q0355", "q0399"],
+    "remision": ["q0341", "q0381"],
+    "fecha_erronea": ["q0135", "q0166"],
     "respondible": ["q0509", "q0513", "q0525", "q0529", "q0531", "q0541", "q0544", "q0550", "q0559", "q0571",
                     "q0579", "q0587", "q0589", "q0591"],
 }
