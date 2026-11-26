@@ -7,7 +7,9 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file="../.env", extra="ignore")
 
     gemini_api_key: str = ""
-    gemini_model: str = "gemini-2.5-flash"
+    gemini_model: str = "gemini-3.5-flash-lite"
+    gemini_fallback_models: str = "gemini-3.1-flash-lite,gemini-3.6-flash"
+    gemini_timeout_s: float = 20
     gemini_embed_model: str = "gemini-embedding-001"
     embed_dim: int = 768
 

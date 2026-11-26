@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import time
 from collections import deque
 from collections.abc import AsyncIterator
@@ -8,6 +9,9 @@ from google import genai
 from google.genai import errors, types
 
 from .config import get_settings
+
+log = logging.getLogger("uvicorn.error")
+FALLBACK_CODES = (404, 429, 500, 503, 504)
 
 SYSTEM_PROMPT = (
     "Eres DocuMind, un asistente sobre derecho laboral peruano del régimen privado. "
@@ -43,11 +47,11 @@ async def _wait_for_budget(tokens: int):
             await asyncio.sleep(max(_window[0][0] + 60 - now, 1))
 
 
-async def _retry(call, attempts: int = 5):
+async def _retry(call, attempts: int = 5, timeout: float | None = None):
     delay = 5.0
     for attempt in range(attempts):
         try:
-            return await call()
+            return await asyncio.wait_for(call(), timeout)
         except errors.APIError as exc:
             if exc.code not in (429, 500, 503) or attempt == attempts - 1:
                 raise
@@ -83,7 +87,10 @@ async def embed(texts: list[str], query: bool = False) -> list[list[float]]:
                 ),
             )
 
-        result = await _retry(call)
+        if query:
+            result = await _retry(call, attempts=2, timeout=settings.gemini_timeout_s)
+        else:
+            result = await _retry(call)
         vectors.extend(list(e.values) for e in result.embeddings)
     return vectors
 
@@ -103,24 +110,33 @@ def build_prompt(question: str, passages: list[dict], history: list[dict]) -> st
     return "\n\n".join(parts)
 
 
-async def stream_answer(prompt: str) -> AsyncIterator[str]:
+def answer_models() -> list[str]:
     settings = get_settings()
-    delay = 2.0
-    for attempt in range(4):
+    names = [settings.gemini_model, *settings.gemini_fallback_models.split(",")]
+    return list(dict.fromkeys(n.strip() for n in names if n.strip()))
+
+
+async def stream_answer(prompt: str) -> AsyncIterator[str]:
+    timeout = get_settings().gemini_timeout_s
+    config = types.GenerateContentConfig(system_instruction=SYSTEM_PROMPT, temperature=0.2)
+    models = answer_models()
+    for model in models:
         started = False
         try:
-            stream = await client().aio.models.generate_content_stream(
-                model=settings.gemini_model,
-                contents=prompt,
-                config=types.GenerateContentConfig(system_instruction=SYSTEM_PROMPT, temperature=0.2),
+            stream = await asyncio.wait_for(
+                client().aio.models.generate_content_stream(model=model, contents=prompt, config=config),
+                timeout,
             )
-            async for part in stream:
+            parts = aiter(stream)
+            while (part := await asyncio.wait_for(anext(parts, None), timeout)) is not None:
                 if part.text:
                     started = True
                     yield part.text
-            return
-        except errors.APIError as exc:
-            if started or exc.code not in (429, 500, 503) or attempt == 3:
+            if started:
+                return
+            raise TimeoutError("respuesta vacía")
+        except Exception as exc:
+            code = exc.code if isinstance(exc, errors.APIError) else None
+            if started or model == models[-1] or (code is not None and code not in FALLBACK_CODES):
                 raise
-            await asyncio.sleep(delay)
-            delay *= 2
+            log.warning("Gemini %s falló (%s), se prueba el siguiente modelo", model, code or type(exc).__name__)

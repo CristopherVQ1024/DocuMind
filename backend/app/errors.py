@@ -3,7 +3,11 @@ def friendly_error(exc: Exception) -> str:
         return str(exc)
     if "API key" in str(exc):
         return "Falta una clave de Gemini válida. Revisa GEMINI_API_KEY en el .env."
+    if isinstance(exc, TimeoutError):
+        return "Gemini está tardando demasiado en responder. Intenta de nuevo."
     code = getattr(exc, "code", None)
+    if code in (500, 503, 504):
+        return "Gemini está saturado en este momento. Intenta de nuevo en un minuto."
     if code == 402:
         return "Se agotaron los créditos prepago de Gemini. Recarga saldo o usa una clave de un proyecto sin facturación."
     if code == 429:

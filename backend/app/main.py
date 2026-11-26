@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, HTTPException
@@ -11,6 +12,8 @@ from . import db, gemini, indexer, normas, retrieval
 from .auth import current_user
 from .config import get_settings
 from .errors import friendly_error
+
+log = logging.getLogger("uvicorn.error")
 
 
 @asynccontextmanager
@@ -112,6 +115,7 @@ async def chat(body: ChatRequest, user_id: str = Depends(current_user)):
         except asyncio.CancelledError:
             raise
         except Exception as exc:
+            log.exception("Falló la consulta")
             failure = friendly_error(exc)
             yield sse("error", {"message": failure})
         finally:
